@@ -1,0 +1,22 @@
+{
+  "name": "painter",
+  "version": "1.0.0",
+  "description": "My ultimate Nuxt.js project",
+  "author": "pengyongtxd",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/axios": "^5.10.3",
+    "element-ui": "^2.4.11",
+    "nuxt": "^2.0.0"
+  },
+  "devDependencies": {
+    "node-sass": "^4.5.3",
+    "sass-loader": "^6.0.6"
+  }
+}

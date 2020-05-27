@@ -52,7 +52,7 @@
           <div class="item-hd">
                 <div>图层{{ viewsIndex + 1 }}</div>
                 <div>
-                    <el-button type="text">插入图层</el-button>
+                    <el-button type="text" >插入图层</el-button>
                     <el-button type="text">折叠</el-button>
                     <el-button type="text">上移一层</el-button>
                     <el-button type="text">下移一层</el-button>

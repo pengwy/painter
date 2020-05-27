@@ -18,7 +18,7 @@ export default class Painter {
     for (const view of this.data.views) {
        this._drawAbsolute(view);
     }
-    // callback();
+    callback();
   }
 
   async _background() {
@@ -28,8 +28,6 @@ export default class Painter {
       height
     } = this.style;
     const bg = this.data.background;
-    console.log('bg',bg);
-    
     this.ctx.translate(width / 2, height / 2);
     this._doClip(this.data.borderRadius, width, height);
     await this.drawImage(this.ctx,bg,-(width / 2),-(height / 2),width,height
@@ -47,21 +45,6 @@ export default class Painter {
       };
       img.src = bg;
     });
-  }
-  drawImageCli(ctx, bg, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
-    let img = new Image();
-    img.setAttribute("crossOrigin", "anonymous");
-    img.src = bg;
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-    // return new Promise(resolve => {
-    //   let img = new Image();
-    //   img.setAttribute('crossOrigin', 'anonymous');
-    //   img.onload = function () {
-    //     ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-    //     resolve()
-    //   }
-    //   img.src = bg;
-    // })
   }
   async _drawAbsolute(view) {
     if (!(view && view.type)) {
@@ -103,7 +86,7 @@ export default class Painter {
       r3 = 0,
       r4 = 0;
     const minSize = Math.min(width, height);
-    if (borderRadius) {
+    if (borderRadius != '0') {
       const border = borderRadius.split(/\s+/);
       if (border.length === 4) {
         r1 = Math.min(border[0].toPx(false, minSize), width / 2, height / 2);
@@ -583,10 +566,6 @@ export default class Painter {
       height,
       extra,
     } = this._preProcess(view, view.css.background && view.css.borderRadius);
-    console.log(width,
-      height,
-      extra, );
-
     this.ctx.fillStyle = (view.css.color || 'black');
 
     const {

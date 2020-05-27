@@ -15,11 +15,15 @@ import { mapState } from "vuex";
 export default {
   name: "uploadImg",
   components: {},
-  props: ["num", "data", "successFun"],
+  props: {
+    num: {
+      type: Number,
+      default:0
+    },
+  },
   data() {
     return {
       uploadData:{'_token':'6jWG0lv5BEGtwTN99HhQTETeziYYXhe388WdUPwx',source:''},
-      
     };
   },
   computed: {
@@ -33,7 +37,7 @@ export default {
   methods: {
     handleAvatarSuccess(res) {
       let file = res.info[0]
-      this.$emit('successFun', file)
+      this.$emit('successFun', {file:file,num:this.num})
     },
     beforeAvatarUpload(file) {
       const isPNG = file.type === "image/png";

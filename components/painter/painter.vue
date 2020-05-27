@@ -4,15 +4,17 @@
 
 <script>
 import Pen from "./pen";
+import { setInterval } from 'timers';
 const util = require("./util");
 let screenK = 0.5;
+let painierStatus = true
 export default {
   name: "HelloWorld",
   mounted() {
     this.setStringPrototype();
-    this.paintCount = 0;
+    // this.paintCount = 0;
     // this.startPaint();
-    this.getImageInfo();
+    // this.getImageInfo();
   },
   props: {
     customStyle: {
@@ -21,8 +23,8 @@ export default {
     paletteDate: {
       type: Object
     },
-    dirty:{
-      type:Boolean
+    dirty: {
+      type: Boolean
     }
   },
   data() {
@@ -33,7 +35,7 @@ export default {
         width: "",
         height: ""
       },
-      palette: this.paletteDate
+      palette: ""
     };
   },
   methods: {
@@ -55,10 +57,15 @@ export default {
       return true;
     },
 
-    startPaint() {
+   async  startPaint() {
       if (this.isEmpty(this.palette)) {
         return;
       }
+      if(!painierStatus){
+         let status = await this.changePainierStatus()
+      }
+      console.log('开始');
+      painierStatus =false
       screenK = 375 / 750;
       let { width, height } = this.palette;
       const ele = document.getElementById("k-canvas");
@@ -66,17 +73,24 @@ export default {
       ele.height = height.toPx();
       const ctx = ele.getContext("2d");
       const pen = new Pen(ctx, this.palette);
-      console.log('pen',this.palette);
       pen.paint(
         () => {
-          this.saveImgToLocal();
+          console.log('完成');
+          
+          painierStatus = true
         },
         false,
         {}
       );
     },
-    saveImgToLocal() {
-      const that = this;
+    changePainierStatus(){
+      return new Promise((resolve)=>{
+        let a = setInterval(()=>{
+          if(painierStatus){
+            resolve(true)
+          }
+        },300)
+      })
     },
     async getImageInfo() {
       let paletteCopy = this.palette;
@@ -108,13 +122,16 @@ export default {
        * @param {Boolean} minus 是否支持负数
        */
       String.prototype.toPx = function toPx(minus) {
+        if (this == "unset") {
+          return 0;
+        }
         let reg;
         if (minus) {
           reg = /^-?[0-9]+([.]{1}[0-9]+){0,1}(rpx|px)$/g;
         } else {
           reg = /^[0-9]+([.]{1}[0-9]+){0,1}(rpx|px)$/g;
         }
-        const results = reg.exec(this);
+        const results = reg.exec(this + "rpx");
         if (!this || !results) {
           console.error(`The size: ${this} is illegal`);
           return 0;
@@ -136,9 +153,9 @@ export default {
     paletteDate: {
       handler: function(val, oldVal) {
         if (this.isNeedRefresh(val, oldVal)) {
-          this.palette = val
-          this.paintCount = 0;
-          this.getImageInfo()
+            this.palette = val;
+            this.paintCount = 0;
+            this.getImageInfo();
         }
       },
       deep: true

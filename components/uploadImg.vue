@@ -7,7 +7,7 @@
         :show-file-list="false"
         :on-success="handleAvatarSuccess"
         :before-upload="beforeAvatarUpload">
-        <i class="icon-qiehuan iconfont"></i>
+        <i class="icon-jiahao_1 iconfont"></i>
     </el-upload>
 </template>
 <script>
@@ -59,8 +59,8 @@ export default {
 
 <style lang="scss">
 .avatar-uploader .el-upload {
-  width: 120px;
-  height:120px;
+  width: 100px;
+  height:100px;
   border: 1px dashed #d9d9d9;
   border-radius: 6px;
   cursor: pointer;
@@ -70,7 +70,7 @@ export default {
 .avatar-uploader .el-upload:hover {
   border-color: #409eff;
 }
-.icon-qiehuan{
+.icon-jiahao_1{
   color: #fff;
 }
 .avatar-uploader-icon {

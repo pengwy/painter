@@ -95,7 +95,7 @@ export default class Painter {
         r4 = Math.min(border[3].toPx(false, minSize), width / 2, height / 2);
       } else {
         r1 = r2 = r3 = r4 = Math.min(
-          borderRadius && borderRadius.toPx(false, minSize),
+          // borderRadius && borderRadius.toPx(false, minSize),
           width / 2,
           height / 2
         );

@@ -51,12 +51,11 @@ export default {
     },
 
     isNeedRefresh(newVal, oldVal) {
-      // if (!newVal ||this.isEmpty(newVal) ||(this.dirty && util.equal(newVal, oldVal))) {
-      //   return false;
-      // }
+      if (!newVal ||this.isEmpty(newVal) ||(this.dirty && util.equal(newVal, oldVal)) || !newVal.background) {
+        return false;
+      }
       return true;
     },
-
    async  startPaint() {
       if (this.isEmpty(this.palette)) {
         return;
@@ -154,6 +153,8 @@ export default {
       handler: function(val, oldVal) {
         if (this.isNeedRefresh(val, oldVal)) {
             this.palette = val;
+            console.log(val,'val');
+            
             this.paintCount = 0;
             this.getImageInfo();
         }
@@ -166,7 +167,4 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.canvas {
-  margin-top: 20px;
-}
 </style>

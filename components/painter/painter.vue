@@ -1,20 +1,40 @@
 <template>
-  <canvas canvas-id="k-canvas" id="k-canvas" class="canvas" />
+  <canvas canvas-id="k-canvas" id="k-canvas" class="canvas-el" />
 </template>
 
 <script>
 import Pen from "./pen";
 import { setInterval } from 'timers';
+var FunctionLodash = require('lodash/Function');
+
 const util = require("./util");
 let screenK = 0.5;
 let painierStatus = true
+window.throttle = function(fun,delay){
+    var timer = null;
+    var startTime = Date.now();  
+
+    return function(){
+        var curTime = Date.now();
+        var remaining = delay-(curTime-startTime);  // 计算出两次触发的时间间隔有没有大余delay 
+        var context = this;
+        var args = arguments;
+
+        clearTimeout(timer);
+        if(remaining<=0){ 
+            func.apply(context,args);
+            startTime = Date.now();  // 如果两次触发时间大余delay，则立马触发一次任务函数并且更新起始时间戳
+        }else{
+            timer = setTimeout(fun,remaining);  // 如果两次触发时间小于delay， 则改变定时器时间保证delay时间一定触发任务函数
+        }
+    }
+}
 export default {
-  name: "HelloWorld",
+  name: "painter",
   mounted() {
+    let that = this
     this.setStringPrototype();
-    // this.paintCount = 0;
-    // this.startPaint();
-    // this.getImageInfo();
+    window.throttle =   FunctionLodash.throttle(that.isNeedRefresh, 3000)
   },
   props: {
     customStyle: {
@@ -50,12 +70,13 @@ export default {
       return true;
     },
 
-    isNeedRefresh(newVal, oldVal) {
-      if (!newVal ||this.isEmpty(newVal) ||(this.dirty && util.equal(newVal, oldVal)) || !newVal.background) {
+    isNeedRefresh(that,newVal, oldVal) {
+      if (!newVal ||this.isEmpty(newVal) ||(that.dirty && util.equal(newVal, oldVal)) || !newVal.background) {
         return false;
       }
       return true;
     },
+
    async  startPaint() {
       if (this.isEmpty(this.palette)) {
         return;
@@ -151,10 +172,9 @@ export default {
   watch: {
     paletteDate: {
       handler: function(val, oldVal) {
-        if (this.isNeedRefresh(val, oldVal)) {
+        let that = this
+        if (window.throttle(that,val, oldVal)) {
             this.palette = val;
-            console.log(val,'val');
-            
             this.paintCount = 0;
             this.getImageInfo();
         }
@@ -167,4 +187,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.canvas-el{
+  border: 1px solid #333;
+  margin-left: 20px;
+}
 </style>

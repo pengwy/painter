@@ -21,17 +21,20 @@ export default {
       default:0
     },
   },
+  mounted(){
+    this.uploadData._token = this.configData['_token']
+  },
   data() {
     return {
-      uploadData:{'_token':'6jWG0lv5BEGtwTN99HhQTETeziYYXhe388WdUPwx',source:''},
+      uploadData:{'_token':'',source:''},
     };
   },
   computed: {
     ...mapState({
-      configApi: state => state.configApi
+      configData: state => state.configData
     }),
     uploadUrl() {
-      return this.configApi.apiUrl + "/base/api/upload";
+      return this.configData.apiUrl + "/base/api/upload";
     }
   },
   methods: {

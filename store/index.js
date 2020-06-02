@@ -4,5 +4,10 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 export const state = () => ({
-  configApi: {apiUrl:'/api',tenantId:24},
+  configData: {apiUrl:'/api',id:'','_token':'xd3gnVYtTsYCTf8DLOQEjE48MjSicP07NbTvCPpd'},
+  apiList:{
+    getData:'',
+    saveData:'',
+    uploadImg:'',
+  }
 })

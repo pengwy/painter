@@ -3,8 +3,8 @@
     <el-form ref="form" :model="form" label-width="100px">
       <el-row>
         <el-col :span="13">
-          <el-form-item label="适用产品：">
-            <el-checkbox-group v-model="form.product">
+          <el-form-item label="适用产品：" required>
+            <el-checkbox-group v-model="product">
               <el-checkbox
                 v-for="(item, index) in defaultData.product"
                 :label="item.value"
@@ -15,10 +15,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="13">
-          <el-form-item label="海报类型：">
-            <el-radio-group v-model="form.pageType">
+          <el-form-item label="海报类型：" required>
+            <el-radio-group v-model="form.type">
               <el-radio
-                v-for="(item, index) in defaultData.pageType"
+                v-for="(item, index) in defaultData.type"
                 :key="index"
                 :label="item.value"
                 @change="initTemplate"
@@ -29,14 +29,14 @@
         <el-col :span="13">
           <el-col :span="16">
             <el-form-item label="海报标签：">
-              <el-input v-model="form.lable"></el-input>
+              <el-input v-model="form.title"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item v-if="form.pageType == 2" label="活动类型：">
-              <el-select v-model="form.activityType" placeholder="请选择活动类型">
+            <el-form-item v-if="form.type == 2" label="活动类型：">
+              <el-select v-model="form.type_son" placeholder="请选择活动类型">
                 <el-option
-                  v-for="(item, index) in defaultData.activityType"
+                  v-for="(item, index) in defaultData.type_son"
                   :key="index"
                   :label="item.name"
                   :value="item.value"
@@ -47,9 +47,9 @@
         </el-col>
         <el-col :span="13">
           <el-col :span="16">
-            <el-form-item label="背景图片：">
+            <el-form-item label="背景图片：" required>
               <div class="upload-com">
-                <img :src="form.templateData.background" crossorigin="anonymous" class="upload-img" />
+                <img :src="form.template.background" crossorigin="anonymous" class="upload-img" />
                 <uploadImg v-on:successFun="changeBgImg"></uploadImg>
               </div>
             </el-form-item>
@@ -57,15 +57,16 @@
               <el-button type="primary" plain @click="addViews" v-show="viewsLastLength == 0">添加图层</el-button>
               <div
                 class="view-item"
-                v-for="(viewsItem, viewsIndex) in form.templateData.views"
-                v-show="viewsIndex != viewsLastLength"
+                v-for="(viewsItem, viewsIndex) in form.template.views"
+                v-if="viewsIndex != viewsLastLength"
                 :key="viewsIndex"
+                :class="{'panle-hide':viewsItem.isHide}"
               >
                 <div class="item-hd">
                   <div>图层{{ viewsIndex + 1 }}</div>
                   <div>
                     <el-button type="text" @click="addViews(viewsIndex)">插入图层</el-button>
-                    <el-button type="text">折叠</el-button>
+                    <el-button type="text" @click="changePanle(viewsItem,viewsIndex)">{{viewsItem.isHide | changeText}}</el-button>
                     <el-button type="text" v-show="viewsIndex > 0" @click="upViews(viewsIndex)">上移一层</el-button>
                     <el-button
                       type="text"
@@ -82,6 +83,7 @@
                         v-for="(item, index) in defaultData.viewsMold"
                         :key="index"
                         :label="item.value"
+                        @change="(event)=>{changeViewsMold(event,viewsItem,viewsIndex)}"
                       >{{ item.name }}</el-radio>
                     </el-radio-group>
                   </el-form-item>
@@ -116,8 +118,8 @@
                         v-model="viewsItem.changeKeyWords"
                         placeholder="请选择可变字段"
                         @change="
-                          event => {
-                            setKeyWords(event, viewsItem, viewsItem.type);
+                          $event => {
+                            setKeyWords($event, viewsItem, viewsItem.type);
                           }
                         "
                       >
@@ -127,7 +129,7 @@
                           ][viewsItem.type]"
                           :key="index"
                           :label="item.name"
-                          :value="item.value"
+                          :value="item.name"
                         ></el-option>
                       </el-select>
                     </el-form-item>
@@ -136,15 +138,18 @@
                       <el-form-item label="文字颜色：">
                         <el-color-picker v-model="viewsItem.css.color"></el-color-picker>
                       </el-form-item>
-                      <el-form-item label="字号大小：">
+                      <el-form-item label="字号大小：" class="G-Mb-10">
                         <el-input placeholder="请输入字号大小" v-model="viewsItem.css.fontSize">
                           <template slot="append">px</template>
                         </el-input>
                       </el-form-item>
-                      <el-form-item label="行间距：">
+                      <el-form-item label="行间距：" class="G-Mb-10">
                         <el-input placeholder="请输入行间距" v-model="viewsItem.css.lineHeight">
                           <template slot="append">px</template>
                         </el-input>
+                      </el-form-item>
+                      <el-form-item label="最大行数：">
+                        <el-input placeholder="请输入最大行数" v-model="viewsItem.css.maxLines"></el-input>
                       </el-form-item>
                       <el-form-item label="对齐形式：">
                         <el-radio-group v-model="viewsItem.css.textAlign">
@@ -192,21 +197,21 @@
               </div>
             </el-form-item>
           </el-col>
-          <el-col :span="6" v-show="form.templateData.background">
+          <el-col :span="6" v-show="form.template.background" class="G-Ml-10">
             <painter
               class="fl-row-center"
               :customStyle="customStyle"
               @imgOK="onImgOk"
-              :paletteDate="form.templateData"
+              :paletteDate="form.template"
               :dirty="false"
             />
           </el-col>
         </el-col>
         <el-col :span="13">
           <el-col :span="16">
-            <el-form-item label="码设置：">
+            <el-form-item label="码设置：" required>
               <el-form-item label="形状：" label-width="60px">
-                <el-radio-group v-model="form.templateData.views[viewsLastLength].css.borderRadius">
+                <el-radio-group v-model="form.template.views[viewsLastLength].css.borderRadius">
                   <el-radio
                     v-for="(item, index) in defaultData.borderRadius"
                     :key="index"
@@ -217,17 +222,17 @@
               <el-form-item label="位置：" label-width="60px" class="change-width">
                 <el-input
                   placeholder="请输入上边距"
-                  v-model="form.templateData.views[viewsLastLength].css.top"
+                  v-model="form.template.views[viewsLastLength].css.top"
                 >
-                  {{ form.templateData.views[viewsLastLength].css.top }}
+                  {{ form.template.views[viewsLastLength].css.top }}
                   <template slot="prepend">上边距</template>
                   <template slot="append">px</template>
                 </el-input>
                 <el-input
                   placeholder="请输入左边距"
-                  v-model="form.templateData.views[viewsLastLength].css.left"
+                  v-model="form.template.views[viewsLastLength].css.left"
                 >
-                  {{ form.templateData.views[viewsLastLength].css.left }}
+                  {{ form.template.views[viewsLastLength].css.left }}
                   <template
                     slot="prepend"
                   >左边距</template>
@@ -235,9 +240,9 @@
                 </el-input>
                 <el-input
                   placeholder="请输入下边距"
-                  v-model="form.templateData.views[viewsLastLength].css.bottom"
+                  v-model="form.template.views[viewsLastLength].css.bottom"
                 >
-                  {{ form.templateData.views[viewsLastLength].css.bottom }}
+                  {{ form.template.views[viewsLastLength].css.bottom }}
                   <template
                     slot="prepend"
                   >下边距</template>
@@ -245,9 +250,9 @@
                 </el-input>
                 <el-input
                   placeholder="请输入右边距"
-                  v-model="form.templateData.views[viewsLastLength].css.right"
+                  v-model="form.template.views[viewsLastLength].css.right"
                 >
-                  {{ form.templateData.views[viewsLastLength].css.right }}
+                  {{ form.template.views[viewsLastLength].css.right }}
                   <template
                     slot="prepend"
                   >右边距</template>
@@ -257,13 +262,13 @@
               <el-form-item label="大小：" class="change-width" label-width="60px">
                 <el-input
                   placeholder="请输入宽度"
-                  v-model="form.templateData.views[viewsLastLength].css.width"
+                  v-model="form.template.views[viewsLastLength].css.width"
                 >
                   <template slot="append">px</template>
                 </el-input>
                 <el-input
                   placeholder="请输入高度"
-                  v-model="form.templateData.views[viewsLastLength].css.height"
+                  v-model="form.template.views[viewsLastLength].css.height"
                 >
                   <template slot="append">px</template>
                 </el-input>
@@ -271,7 +276,7 @@
               <el-col :span="8">
                 <el-form-item label="线框：" label-width="60px">
                   <el-radio-group
-                    v-model="form.templateData.views[viewsLastLength].css.hasBorder"
+                    v-model="form.template.views[viewsLastLength].css.hasBorder"
                     @change="changeBorder"
                   >
                     <el-radio
@@ -283,11 +288,11 @@
                 </el-form-item>
               </el-col>
               <!-- 有现框 -->
-              <div v-if="form.templateData.views[viewsLastLength].css.borderWidth">
+              <div v-if="form.template.views[viewsLastLength].css.borderWidth">
                 <el-col :span="7">
                   <el-form-item label="线框颜色：" label-width="100px">
                     <el-color-picker
-                      v-model="form.templateData.views[viewsLastLength].css.borderColor"
+                      v-model="form.template.views[viewsLastLength].css.borderColor"
                     ></el-color-picker>
                   </el-form-item>
                 </el-col>
@@ -295,7 +300,7 @@
                   <el-form-item label="线框大小：">
                     <el-input
                       placeholder="请输入线框大小"
-                      v-model="form.templateData.views[viewsLastLength].css.borderWidth"
+                      v-model="form.template.views[viewsLastLength].css.borderWidth"
                     >
                       <template slot="append">px</template>
                     </el-input>
@@ -307,12 +312,29 @@
         </el-col>
         <el-col :span="13"></el-col>
       </el-row>
-      <el-form-item label="预览图片">
+      <el-form-item label="预览图片：" required>
         <div class="upload-com">
-          <img :src="form.smallBg" crossorigin="anonymous" class="upload-img" />
+          <img :src="form.small_bg" crossorigin="anonymous" class="upload-img" />
           <uploadImg v-on:successFun="changeSmallBg"></uploadImg>
         </div>
       </el-form-item>
+      <el-col :span="13">
+        <el-form-item label="海报状态：" required>
+          <el-radio-group v-model="form.status">
+            <el-radio
+              v-for="(item, index) in defaultData.status"
+              :key="index"
+              :label="item.value"
+            >{{ item.name }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-col>
+      <el-col :span="13">
+        <el-form-item>
+          <el-button type="primary" @click="onSaveData">保存</el-button>
+          <el-button>返回</el-button>
+        </el-form-item>
+      </el-col>
     </el-form>
   </div>
 </template>
@@ -320,20 +342,27 @@
 // @ is an alias to /src
 import painter from "@/components/painter/painter.vue";
 import uploadImg from "../components/uploadImg.vue";
+import { mapState } from "vuex";
 import { log } from "util";
+import { getDes, saveDes } from "@/http/api";
 export default {
   name: "Home",
-  mounted() {},
+  mounted() {
+    this.form.id = this.configData.id
+    this.initData( this.form.id);
+    // this.form._token = this.configData['_token']
+  },
   components: { painter, uploadImg },
   data() {
     return {
+      product: [1],
       form: {
-        product: [1],
-        pageType: 1,
-        lable: "",
-        activityType: "",
-        smallBg: "",
-        templateData: {
+        type: 1,
+        id:"",
+        title: "",
+        type_son: 100,
+        small_bg: "",
+        template: {
           width: "500",
           height: "875",
           background: "",
@@ -355,11 +384,12 @@ export default {
               }
             }
           ]
-        }
+        },
+        status: 0
       },
       defaultData: {
         product: [{ name: "店员助手小程序", value: 1 }],
-        pageType: [
+        type: [
           { name: "商品", value: 1 },
           { name: "营销活动", value: 2 },
           { name: "门店", value: 3 },
@@ -367,7 +397,7 @@ export default {
           { name: "蜜蜂特使", value: 5 },
           { name: "成单黑客", value: 6 }
         ],
-        activityType: [
+        type_son: [
           { name: "签到有礼", value: 100 },
           { name: "拼团售卡", value: 200 },
           { name: "以旧换新", value: 300 }
@@ -388,23 +418,20 @@ export default {
                 value:
                   "商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题"
               },
-              { name: "商品价格", value: "200000.00" }
+              { name: "商品价格", value: "200000" }
             ],
             image: [
               {
                 name: "商品图片",
-                value:
-                  "商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题"
+                value: "/baseImg/admin/images/painter/goods.png"
               },
               {
                 name: "品牌logo",
-                value:
-                  "商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题"
+                value: "/baseImg/admin/images/painter/brand.png"
               },
               {
                 name: "门店logo",
-                value:
-                  "商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题"
+                value: "/baseImg/admin/images/painter/store.png"
               }
             ]
           },
@@ -412,7 +439,7 @@ export default {
             text: [
               {
                 name: "门店名称",
-                value: "门店名称门店名称门店名称门店名",
+                value: "门店名称门店名称门店名称门店名"
               },
               {
                 name: "门店地址",
@@ -442,15 +469,15 @@ export default {
             text: [
               {
                 name: "活动名称",
-                value: "活动名称活动名称活动",
+                value: "活动名称活动名称活动"
               },
               {
                 name: "活动时间",
-                value: "2020-04-07 至 2020-05-31",
+                value: "2020-04-07 至 2020-05-31"
               },
               {
                 name: "门店名称",
-                value: "门店名称门店名称门店名称门店名",
+                value: "门店名称门店名称门店名称门店名"
               }
             ],
             image: []
@@ -459,27 +486,27 @@ export default {
             text: [
               {
                 name: "活动名称",
-                value: "活动名称活动名称活动",
+                value: "活动名称活动名称活动"
               },
               {
                 name: "活动时间",
-                value: "2020-04-07 至 2020-05-31",
+                value: "2020-04-07 至 2020-05-31"
               },
               {
                 name: "门店名称",
-                value: "门店名称门店名称门店名称门店名",
+                value: "门店名称门店名称门店名称门店名"
               },
               {
                 name: "已购买人数",
-                value: "9999",
+                value: "9999"
               },
               {
                 name: "{$购买金额}",
-                value: "9999.99",
+                value: "9999.99"
               },
               {
                 name: "最高可抵扣金额",
-                value: "9999.99",
+                value: "9999.99"
               }
             ],
             image: []
@@ -488,19 +515,19 @@ export default {
             text: [
               {
                 name: "活动名称",
-                value: "活动名称活动名称活动",
+                value: "活动名称活动名称活动"
               },
               {
                 name: "活动时间",
-                value: "2020-04-07 至 2020-05-31",
+                value: "2020-04-07 至 2020-05-31"
               },
               {
                 name: "门店名称",
-                value: "门店名称门店名称门店名称门店名",
+                value: "门店名称门店名称门店名称门店名"
               },
               {
                 name: "最高可抵扣金额",
-                value: "9999",
+                value: "9999"
               }
             ],
             image: []
@@ -520,19 +547,34 @@ export default {
           { name: "有", value: 1 }
         ],
         blankViews: {
-          viewsMold: 1,
-          type: "image",
-          changeKeyWords: "",
-          text: "",
-          url: "",
-          css: {
-            right: "",
-            bottom: "",
-            width: "",
-            height: ""
+          "1": {
+            viewsMold: 1,
+            type: "image",
+            url: "",
+            changeKeyWords: "",
+            isHide: false,
+            css: {
+              right: "",
+              bottom: "",
+              width: "",
+              height: ""
+            }
+          },
+          "2": {
+            viewsMold: 2,
+            type: "image",
+            url: "",
+            changeKeyWords: "",
+            isHide: false,
+            css: {
+              right: "",
+              bottom: "",
+              width: "",
+              height: ""
+            }
           }
         },
-        templateData: {
+        template: {
           width: "500",
           height: "875",
           background: "",
@@ -542,6 +584,7 @@ export default {
               viewsType: "text",
               type: "image",
               changeKeyWords: "",
+              isHide: false,
               url:
                 "https://api.cw100.com//storage/mini_wxcbe60162f9dc451c/2020/04/21/_a=3361&t=kq&sid=87&cid=110100.jpg",
               css: {
@@ -554,71 +597,136 @@ export default {
               }
             }
           ]
-        }
+        },
+        status: [
+          { name: "上架", value: 1 },
+          { name: "下架", value: 0 }
+        ]
       },
       customStyle: "",
       baseUrl: "/baseImg"
     };
   },
   computed: {
+    ...mapState({
+      configData: state => state.configData
+    }),
     viewsLastLength() {
-      return this.form.templateData.views.length - 1;
+      return this.form.template.views.length - 1;
     },
     usePageType() {
-      if (this.form.pageType == 2) {
-        return this.form.activityType;
+      if (this.form.type == 2) {
+        return this.form.type_son;
       } else {
-        return this.form.pageType;
+        return this.form.type;
       }
     }
   },
   methods: {
+    initData(id = "") {
+      if (!id) {
+        //编辑，使用初始化数据
+        return false;
+      }
+      let that = this;
+      getDes({ id: id })
+        .then(res => {
+          if(!res.status){
+            that.$message.error("请求失败")
+            return false
+          }
+          res.data.template = JSON.parse(res.data.template)
+          that.form = res.data;
+        })
+        .catch(res => {
+          that.$message.error("请求失败4");
+        });
+    },
+    onSaveData() {
+      let that = this
+      let postData = this.deepClone(this.form);
+      if(postData.template.views.length > 1 ){
+         postData.template.views.forEach(element => {
+          delete  element.el
+         });
+      }
+      postData.template = JSON.stringify(postData.template)
+      delete postData.type_son
+      if (postData.type == 2) {
+        postData.type_son = this.usePageType;
+        postData.id = this.configData.id;
+      }
+    
+      saveDes({data:postData,'_token':this.configData['_token']})
+        .then(res => {
+          if (res.status) {
+            that.listData = res.data;
+          } else {
+            that.$message.error("请求失败");
+          }
+        })
+        .catch(res => {
+          that.$message.error("请求失败4");
+        });
+    },
     onImgOk() {
       console.log(111111111);
     },
     changeSmallBg(data) {
-      this.form.smallBg = this.baseUrl + data.file.path;
+      this.form.small_bg = this.baseUrl + data.file.path;
     },
     changeBgImg(data) {
-      this.form.templateData.background = this.baseUrl + data.file.path;
+      this.form.template.background = this.baseUrl + data.file.path;
     },
     handleChange(val) {
       console.log(val);
     },
     addViewImg(data) {
       let { file, num } = data;
-      let copyItem = this.form.templateData.views[num];
+      let copyItem = this.form.template.views[num];
       copyItem.url = this.baseUrl + file.path;
-      this.form.templateData.views.splice(num, 1, copyItem);
+      this.form.template.views.splice(num, 1, copyItem);
+    },
+    changeViewsMold(e, item, index) {
+      console.log(index);
+      //切换图层类型时清空数据
+      this.form.template.views.splice(
+        index,
+        1,
+        this.deepClone(this.defaultData.blankViews[e])
+      );
     },
     changeViewsType(e, item, index) {
       // 清空可变字段
       item.changeKeyWords = "";
       //设置默认值
-      let cssData
-      if(e == 'image'){
+      let cssData;
+      if (e == "image") {
         cssData = {
-            right: "",
-            bottom: "",
-            width: "",
-            height: ""
-        }
-      }else{
+          right: "",
+          bottom: "",
+          width: "",
+          height: ""
+        };
+      } else {
         cssData = {
-            right: "",
-            bottom: "",
-            width: "",
-            height: "",
-            lineHeight:'14',
-            fontSize:'14',
-            textAlign:'left',
-            color:'#333',
-        }
+          right: "",
+          bottom: "",
+          width: "",
+          height: "",
+          lineHeight: "14",
+          fontSize: "14",
+          textAlign: "left",
+          color: "#333",
+          maxLines: 1
+        };
       }
-      item.css = cssData
+      item.css = cssData;
     },
     changeBorder(e) {
-      let cssData = this.deepClone(this.form.templateData.views[this.viewsLastLength].css)
+      let cssData = this.deepClone(
+        this.form.template.views[this.viewsLastLength].css
+      );
       if (e == 0) {
         delete cssData.borderWidth;
         delete cssData.borderColor;
@@ -626,60 +734,60 @@ export default {
         cssData.borderWidth = "1";
         cssData.borderColor = "#333";
       }
-      this.form.templateData.views[this.viewsLastLength].css = cssData;
+      this.form.template.views[this.viewsLastLength].css = cssData;
+    },
+    changePanle(item) {
+      item.isHide = !item.isHide;
     },
     addViews(index = 0) {
-      this.form.templateData.views.splice(
-        index - 1,
+      this.form.template.views.splice(
+        index + 1,
         0,
-        this.deepClone(this.defaultData.blankViews)
+        this.deepClone(this.defaultData.blankViews["1"])
       );
     },
     deleteViews(index) {
-      this.form.templateData.views.splice(index, 1);
+      this.form.template.views.splice(index, 1);
     },
     upViews(index) {
-      let a = this.form.templateData.views[index];
-      this.form.templateData.views.splice(index, 1);
-      this.form.templateData.views.splice(index - 1, 0, a);
+      let a = this.form.template.views[index];
+      this.form.template.views.splice(index, 1);
+      this.form.template.views.splice(index - 1, 0, a);
     },
     downViews(index) {
-      let a = this.form.templateData.views[index];
-      this.form.templateData.views.splice(index, 1);
-      this.form.templateData.views.splice(index + 1, 0, a);
+      let a = this.form.template.views[index];
+      this.form.template.views.splice(index, 1);
+      this.form.template.views.splice(index + 1, 0, a);
     },
     setKeyWords(event, item, type) {
+      let defaultData = {
+        text: "text",
+        image: "url"
+      };
       //将可变字段的值赋给图层
-      item[type] = event;
       //将该字段的变量值 加在图层信息上
+      let a = {};
+      a = this.defaultData.changeKeyWords[this.usePageType][type].find(e => {
+        return e.name == event;
+      });
+      console.log("a.value", a.value);
 
-
-
-
-
+      item[defaultData[type]] = a.value;
     },
     deepClone(obj) {
       return JSON.parse(JSON.stringify(obj));
     },
     initTemplate() {
-      this.form.templateData = this.deepClone(this.defaultData.templateData);
-      this.form.lable = "";
-      this.form.activityType = "";
-      this.form.smallBg = "";
+      this.form.template = this.deepClone(this.defaultData.template);
+      this.form.title = "";
+      this.form.type_son = 100;
+      this.form.small_bg = "";
     }
   },
   filters: {
-    clear(value) {
-      if (!value) {
-        return "";
-      }
-      let val = value.replace("", "");
-      console.log(value, val);
-      return val;
-    }
-    // addImgBaseUrl: function(value) {
-    //   return `/baseImg${value}`;
-    // }
+    changeText(value){
+      return value ? '展开':'折叠'
+    },
   }
 };
 </script>
@@ -716,6 +824,7 @@ export default {
 }
 .view-item {
   border: 1px solid rgba(232, 232, 232, 1);
+  margin-bottom: 5px;
   .item-hd {
     display: flex;
     justify-content: space-between;
@@ -725,7 +834,17 @@ export default {
     align-items: center;
   }
   .item-bd {
+    //  animation: name duration timing-function delay iteration-count direction fill-mode;
+    will-change: height;
+    transition: height 1;
     padding: 10px;
+    overflow: hidden;
+  }
+  &.panle-hide {
+    .item-bd {
+      height: 0;
+      padding: 0;
+    }
   }
 }
 .change-width {

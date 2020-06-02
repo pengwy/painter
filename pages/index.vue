@@ -369,9 +369,8 @@ export default {
           views: [
             {
               viewsMold: 1,
-              viewsType: "text",
               type: "image",
-              changeKeyWords: "",
+              changeKeyWords: "minicode",
               url:
                 "https://api.cw100.com//storage/mini_wxcbe60162f9dc451c/2020/04/21/_a=3361&t=kq&sid=87&cid=110100.jpg",
               css: {
@@ -430,7 +429,7 @@ export default {
                 value: "/baseImg/admin/images/painter/brand.png"
               },
               {
-                name: "门店logo",
+                name: "商家logo",
                 value: "/baseImg/admin/images/painter/store.png"
               }
             ]

@@ -1,8 +1,8 @@
 <template>
   <div class="home">
-    <el-form ref="form" :model="form" label-width="100px">
+    <el-form ref="form" :model="form" label-width="172px">
       <el-row>
-        <el-col :span="13">
+        <el-col :lg="14" :md="18" >
           <el-form-item label="适用产品：" required>
             <el-checkbox-group v-model="product">
               <el-checkbox
@@ -14,27 +14,27 @@
             </el-checkbox-group>
           </el-form-item>
         </el-col>
-        <el-col :span="13">
+        <el-col :lg="14"  :md="18">
           <el-form-item label="海报类型：" required>
             <el-radio-group v-model="form.type">
               <el-radio
                 v-for="(item, index) in defaultData.type"
                 :key="index"
                 :label="item.value"
-                @change="initTemplate"
+                @change="initTemplate($event)"
               >{{ item.name }}</el-radio>
             </el-radio-group>
           </el-form-item>
         </el-col>
-        <el-col :span="13">
-          <el-col :span="16">
-            <el-form-item label="海报标签：">
+        <el-col :lg="14"  :md="18">
+          <el-col :lg="14" :md="12">
+            <el-form-item label="海报标签：" required>
               <el-input v-model="form.title"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="6">
-            <el-form-item v-if="form.type == 2" label="活动类型：">
-              <el-select v-model="form.type_son" placeholder="请选择活动类型">
+          <el-col :lg="7" :md="12">
+            <el-form-item v-if="form.type == 2" label="活动类型：" required>
+              <el-select v-model="form.type_son" @change="initTemplate($event)" placeholder="请选择活动类型">
                 <el-option
                   v-for="(item, index) in defaultData.type_son"
                   :key="index"
@@ -45,15 +45,16 @@
             </el-form-item>
           </el-col>
         </el-col>
-        <el-col :span="13">
-          <el-col :span="16">
+        <el-col :lg="14" :md="20">
+          <el-col :lg="18" :md="18">
             <el-form-item label="背景图片：" required>
               <div class="upload-com">
                 <img :src="form.template.background" crossorigin="anonymous" class="upload-img" />
                 <uploadImg v-on:successFun="changeBgImg"></uploadImg>
               </div>
+              <p class="prop-text">建议尺寸：800*1260 像素</p>
             </el-form-item>
-            <el-form-item label="基本图层：">
+            <el-form-item label="基本图层：" >
               <el-button type="primary" plain @click="addViews" v-show="viewsLastLength == 0">添加图层</el-button>
               <div
                 class="view-item"
@@ -77,7 +78,7 @@
                   </div>
                 </div>
                 <div class="item-bd">
-                  <el-form-item label="图层类型：">
+                  <el-form-item label="图层类型：" label-width="100px">
                     <el-radio-group v-model="viewsItem.viewsMold">
                       <el-radio
                         v-for="(item, index) in defaultData.viewsMold"
@@ -89,7 +90,7 @@
                   </el-form-item>
                   <!-- 不变图层 -->
                   <div v-if="viewsItem.viewsMold == 1">
-                    <el-form-item label="选择图片：">
+                    <el-form-item label="选择图片：" label-width="100px">
                       <div class="upload-com G-Mb-10">
                         <img :src="viewsItem.url" class="upload-img" crossorigin="anonymous" />
                         <uploadImg v-on:successFun="addViewImg" :num="viewsIndex"></uploadImg>
@@ -97,7 +98,7 @@
                     </el-form-item>
                   </div>
                   <div v-else>
-                    <el-form-item label="图层形式：">
+                    <el-form-item label="图层形式：" label-width="100px">
                       <el-radio-group
                         v-model="viewsItem.type"
                         @change="
@@ -113,7 +114,7 @@
                         >{{ item.name }}</el-radio>
                       </el-radio-group>
                     </el-form-item>
-                    <el-form-item label="可变字段：" class="G-Mb-10">
+                    <el-form-item label="可变字段：" class="G-Mb-10" label-width='100px'>
                       <el-select
                         v-model="viewsItem.changeKeyWords"
                         placeholder="请选择可变字段"
@@ -135,23 +136,23 @@
                     </el-form-item>
                     <!-- 可变字段为文字 -->
                     <div v-if="viewsItem.type == 'text'">
-                      <el-form-item label="文字颜色：">
+                      <el-form-item label="文字颜色：" label-width="100px">
                         <el-color-picker v-model="viewsItem.css.color"></el-color-picker>
                       </el-form-item>
-                      <el-form-item label="字号大小：" class="G-Mb-10">
+                      <el-form-item label="字号大小：" class="G-Mb-10" label-width="100px">
                         <el-input placeholder="请输入字号大小" v-model="viewsItem.css.fontSize">
                           <template slot="append">px</template>
                         </el-input>
                       </el-form-item>
-                      <el-form-item label="行间距：" class="G-Mb-10">
+                      <el-form-item label="行间距：" class="G-Mb-10" label-width="100px">
                         <el-input placeholder="请输入行间距" v-model="viewsItem.css.lineHeight">
                           <template slot="append">px</template>
                         </el-input>
                       </el-form-item>
-                      <el-form-item label="最大行数：">
+                      <el-form-item label="最大行数：" label-width="100px">
                         <el-input placeholder="请输入最大行数" v-model="viewsItem.css.maxLines"></el-input>
                       </el-form-item>
-                      <el-form-item label="对齐形式：">
+                      <el-form-item label="对齐形式：" label-width="100px">
                         <el-radio-group v-model="viewsItem.css.textAlign">
                           <el-radio
                             v-for="(item, index) in defaultData.textAlign"
@@ -163,7 +164,7 @@
                     </div>
                   </div>
                   <!-- 图层公共属性 -->
-                  <el-form-item label="图层位置：" class="change-width">
+                  <el-form-item label="图层位置：" class="change-width" label-width="100px">
                     <el-input placeholder="请输入上边距" v-model="viewsItem.css.top">
                       {{ viewsItem.css.top }}
                       <template slot="prepend">上边距</template>
@@ -185,7 +186,7 @@
                       <template slot="append">px</template>
                     </el-input>
                   </el-form-item>
-                  <el-form-item label="图层大小：" class="change-width">
+                  <el-form-item label="图层大小：" class="change-width" label-width="100px">
                     <el-input placeholder="请输入宽度" v-model="viewsItem.css.width">
                       <template slot="append">px</template>
                     </el-input>
@@ -197,7 +198,7 @@
               </div>
             </el-form-item>
           </el-col>
-          <el-col :span="6" v-show="form.template.background" class="G-Ml-10">
+          <el-col :lg="6" :md="7" v-show="form.template.background" class="G-Ml-10 painter-el" :style="{right:elRight+'px'}">
             <painter
               class="fl-row-center"
               :customStyle="customStyle"
@@ -207,8 +208,8 @@
             />
           </el-col>
         </el-col>
-        <el-col :span="13">
-          <el-col :span="16">
+        <el-col :lg="14" :md="18">
+          <el-col :lg="18" :md="20">
             <el-form-item label="码设置：" required>
               <el-form-item label="形状：" label-width="60px">
                 <el-radio-group v-model="form.template.views[viewsLastLength].css.borderRadius">
@@ -273,7 +274,7 @@
                   <template slot="append">px</template>
                 </el-input>
               </el-form-item>
-              <el-col :span="8">
+              <el-col :lg="9" :md="9">
                 <el-form-item label="线框：" label-width="60px">
                   <el-radio-group
                     v-model="form.template.views[viewsLastLength].css.hasBorder"
@@ -289,15 +290,15 @@
               </el-col>
               <!-- 有现框 -->
               <div v-if="form.template.views[viewsLastLength].css.borderWidth">
-                <el-col :span="7">
-                  <el-form-item label="线框颜色：" label-width="100px">
+                <el-col :lg="7" :md="7">
+                  <el-form-item label="线框颜色：" label-width="90px">
                     <el-color-picker
                       v-model="form.template.views[viewsLastLength].css.borderColor"
                     ></el-color-picker>
                   </el-form-item>
                 </el-col>
-                <el-col :span="9">
-                  <el-form-item label="线框大小：">
+                <el-col :lg="8" :md="8">
+                  <el-form-item label="线框大小：" label-width="90px">
                     <el-input
                       placeholder="请输入线框大小"
                       v-model="form.template.views[viewsLastLength].css.borderWidth"
@@ -310,15 +311,15 @@
             </el-form-item>
           </el-col>
         </el-col>
-        <el-col :span="13"></el-col>
       </el-row>
       <el-form-item label="预览图片：" required>
         <div class="upload-com">
           <img :src="form.small_bg" crossorigin="anonymous" class="upload-img" />
           <uploadImg v-on:successFun="changeSmallBg"></uploadImg>
         </div>
+        <p class="prop-text">建议尺寸：96*150 像素</p>
       </el-form-item>
-      <el-col :span="13">
+      <el-col :lg="14">
         <el-form-item label="海报状态：" required>
           <el-radio-group v-model="form.status">
             <el-radio
@@ -329,7 +330,7 @@
           </el-radio-group>
         </el-form-item>
       </el-col>
-      <el-col :span="13">
+      <el-col :lg="14">
         <el-form-item>
           <el-button type="primary" @click="onSaveData">保存</el-button>
           <el-button>返回</el-button>
@@ -350,7 +351,6 @@ export default {
   mounted() {
     this.form.id = this.configData.id
     this.initData( this.form.id);
-    // this.form._token = this.configData['_token']
   },
   components: { painter, uploadImg },
   data() {
@@ -360,7 +360,7 @@ export default {
         type: 1,
         id:"",
         title: "",
-        type_son: 100,
+        type_son: '100',
         small_bg: "",
         template: {
           width: "500",
@@ -422,15 +422,15 @@ export default {
             image: [
               {
                 name: "商品图片",
-                value: "/baseImg/admin/images/painter/goods.png"
+                value: "/admin/images/painter/goods.png"
               },
               {
                 name: "品牌logo",
-                value: "/baseImg/admin/images/painter/brand.png"
+                value: "/admin/images/painter/brand.png"
               },
               {
                 name: "商家logo",
-                value: "/baseImg/admin/images/painter/store.png"
+                value: "/admin/images/painter/store.png"
               }
             ]
           },
@@ -500,7 +500,7 @@ export default {
                 value: "9999"
               },
               {
-                name: "{$购买金额}",
+                name: "购买金额",
                 value: "9999.99"
               },
               {
@@ -530,7 +530,15 @@ export default {
               }
             ],
             image: []
-          }
+          },
+           "5": {
+            text: [],
+            image: []
+          },
+            "6": {
+            text: [],
+            image: []
+          },
         },
         textAlign: [
           { name: "居左", value: "left" },
@@ -582,7 +590,7 @@ export default {
               viewsMold: 1,
               viewsType: "text",
               type: "image",
-              changeKeyWords: "",
+              changeKeyWords: "minicode",
               isHide: false,
               url:
                 "https://api.cw100.com//storage/mini_wxcbe60162f9dc451c/2020/04/21/_a=3361&t=kq&sid=87&cid=110100.jpg",
@@ -603,7 +611,8 @@ export default {
         ]
       },
       customStyle: "",
-      baseUrl: "/baseImg"
+      baseUrl: "",
+      move:'',
     };
   },
   computed: {
@@ -619,11 +628,15 @@ export default {
       } else {
         return this.form.type;
       }
+    },
+    elRight(){
+      console.log( window.outerWidth);
+      return  window.outerWidth >=1200 ?  515 : 80
     }
   },
   methods: {
-    initData(id = "") {
-      if (!id) {
+    initData(id = 0) {
+      if (id == 0) {
         //编辑，使用初始化数据
         return false;
       }
@@ -659,8 +672,13 @@ export default {
       saveDes({data:postData,'_token':this.configData['_token']})
         .then(res => {
           if (res.status) {
-            that.listData = res.data;
+            that.$message.success("保存成功");
           } else {
+            // that.$message({
+            //   message:"请求失败",
+            //   duration:0
+            // })    
+        
             that.$message.error("请求失败");
           }
         })
@@ -776,12 +794,17 @@ export default {
     deepClone(obj) {
       return JSON.parse(JSON.stringify(obj));
     },
-    initTemplate() {
+    initTemplate(e) {
+      let arr =  [100,200,300]
+      if(!arr.includes(e)){
+          this.form.title = "";
+          this.form.type_son = 100;
+      }else{
+        this.form.type_son = e
+      }
       this.form.template = this.deepClone(this.defaultData.template);
-      this.form.title = "";
-      this.form.type_son = 100;
       this.form.small_bg = "";
-    }
+    },
   },
   filters: {
     changeText(value){
@@ -866,5 +889,19 @@ export default {
 }
 .G-Mb-10 {
   margin-bottom: 10px !important;
+}
+.el-message{
+  top: 100px !important;
+}
+.painter-el{
+    position: fixed;
+    top: 180px;
+    right: calc(100vw - 1200px);
+}
+.prop-text{
+    font-size: 14px;
+    color: #666;
+    line-height: 1;
+    padding-top: 5px;
 }
 </style>

@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const options = {}
-options.baseURL = '/api'
+// options.baseURL = '/api'
 
 const axiosPlugins = axios.create(options)
 

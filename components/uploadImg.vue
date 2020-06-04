@@ -71,10 +71,17 @@ export default {
   overflow: hidden;
 }
 .avatar-uploader .el-upload:hover {
-  border-color: #409eff;
+  .iconfont{
+    display: none;
+  }
 }
 .icon-jiahao_1{
-  color: #fff;
+    color: #eee;
+    font-size: 40px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 .avatar-uploader-icon {
   font-size: 28px;

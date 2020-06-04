@@ -1,4 +1,5 @@
 
+
 export default {
   mode: 'spa',
   /*
@@ -40,6 +41,19 @@ export default {
   */
   buildModules: [
   ],
+  router:{
+    // base: '/app/'
+    extendRoutes (routes, resolve) {
+      routes.push({
+        name: 'custom',
+        path: '*',
+        component: resolve(__dirname, 'pages/index.vue')
+      })
+    },
+    // routes: [
+    //   { path: '*', component: (__dirname, 'pages/index.vue') }
+    // ]
+  },
   /*
   ** Nuxt.js modules
   */
@@ -66,6 +80,7 @@ export default {
   ** Build configuration
   */
   build: {
+    publicPath: '/poster',
     transpile: [/^element-ui/],
     /*
     ** You can extend webpack config here

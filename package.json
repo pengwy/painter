@@ -13,7 +13,7 @@
   "dependencies": {
     "@nuxtjs/axios": "^5.10.3",
     "element-ui": "^2.4.11",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "nuxt": "^2.0.0"
   },
   "devDependencies": {
